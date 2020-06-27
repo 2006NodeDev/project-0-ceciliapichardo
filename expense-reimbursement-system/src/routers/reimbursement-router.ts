@@ -4,13 +4,14 @@ import { Reimbursement } from '../models/reimbursement'
 import { UserInputError } from '../errors/UserInputError'
 import { reimbursementStatusRouter } from './reimbursement-status-router'
 import { reimbursementAuthorRouter } from './reimbursement-author-router'
+//import { authorizationMiddleware } from '../middleware/authorization-middleware'
 
 export const reimbursementRouter = express.Router()
 
 //Redirect all requests on /reimbursement/status to reimbursement-status-router
 reimbursementRouter.use('/status', reimbursementStatusRouter)
 //Redirect all requests on /reimbursement/author/userId to reimbursement-author-router
-reimbursementAuthorRouter.use('/author/userId', reimbursementAuthorRouter)
+reimbursementRouter.use('/author/userId', reimbursementAuthorRouter)
 
 
 //Get all Reimbursements, idk if i really need this but def needs authorization
@@ -20,6 +21,7 @@ reimbursementRouter.get('/', (req:Request, res:Response) => {
 
 
 //Submit Reimbursement
+// authorizationMiddleware(['admin', 'finance-manager', 'user']),
 reimbursementRouter.post('/', (req:Request, res:Response) => {
     console.log(req.body);
     let { reimbursementId,
@@ -50,7 +52,7 @@ reimbursementRouter.post('/', (req:Request, res:Response) => {
 
 
 //Update Reimbursement ***
-/*** add only allowed roles to be finance-manager ***/
+// authorizationMiddleware(['admin', 'finance-manager']),
 
 
 export let reimbursements: Reimbursement[] = [

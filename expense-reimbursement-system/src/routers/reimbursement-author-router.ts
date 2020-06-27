@@ -5,7 +5,8 @@ export const reimbursementAuthorRouter = express.Router()
 
 //Find Reimbursement By User (endpoint) *** this isnt working 
 /*** add only allowed roles to be finance-manager, 
-    or if the id provided matches the id of the current user ***/
+    or if the id provided matches the id of the current user
+        authorizationMiddleware(['admin', 'finance-manager', 'current']), ***/
 reimbursementAuthorRouter.get('/:userId', (req:Request, res:Response) => {
     let {userId} = req.params
     if(isNaN(+userId)) {
@@ -13,15 +14,17 @@ reimbursementAuthorRouter.get('/:userId', (req:Request, res:Response) => {
     }
     else {
         let found = false 
+        //Might need an array of Reimbursements[] here ***
         for(const reimbursement of reimbursements) {
-            //Might need an array of Reimbursements[] here ***
+            console.log(`UserId: ${userId}`);
+            console.log(`Reimbursement Author: ${reimbursement.author}`);
             if(reimbursement.author === +userId) {
                 res.json(reimbursement)
                 found = true
             }
         }
         if(!found) {
-            res.status(404).send('User Not Found')
+            res.status(404).send('Reimbursement Not Found')
         }
     }
 })
