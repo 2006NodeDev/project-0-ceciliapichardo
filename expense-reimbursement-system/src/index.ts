@@ -1,18 +1,22 @@
 import { User } from './models/user'
 import express, { Request, Response } from 'express'
-import { UserInputError } from './errors/UserInputError'
-import { Reimbursement } from './models/reimbursement'
-import { ReimbursementStatus } from './models/reimbursement-status'
+//import { UserInputError } from './errors/UserInputError'
+//import { Reimbursement } from './models/reimbursement'
+//import { ReimbursementStatus } from './models/reimbursement-status'
 import { BadCredentialsError } from './errors/BadCredentialsError'
-import { AuthFailureError } from './errors/AuthFailureError'
+import { AuthenticationFailureError } from './errors/AuthenticationFailureError'
 import { sessionMiddleware } from './middleware/session-middleware'
+//import { Role } from './models/role'
+import { userRouter } from './routers/user-router'
+import { reimbursementRouter } from './routers/reimbursement-router'
 
 //This stays at the top of the file
 const app = express() //creates complete express application
 app.use(express.json()) //Matches every HTTP verb, middleware
 app.use(sessionMiddleware)
+app.use('/users', userRouter) //Redirect all requests on /users to user-router
+app.use('/reimbursements', reimbursementRouter) //Redirect all requests on /reimbursements to reimbursement-router
 
-/******* SECURITY ?? *******/
 
 /******* AVAILABLE ENDPOINTS *******/
 
@@ -34,143 +38,11 @@ app.post('/login', (req:Request, res:Response) => {
             }
         }
         if(!found) {
-            throw new AuthFailureError();
+            throw new AuthenticationFailureError();
         }
     }
 })
 
-//Find Users (endpoint)
-/*** add only allowed roles to be finance-manager ***/
-app.get('/users', (req:Request, res:Response) => { 
-    res.json(users)
-})
-
-//Create new users
-app.post('/users', (req:Request, res:Response) => {
-    console.log(req.body);
-    let { userId,
-        username,
-        password,
-        firstName,
-        lastName,
-        email,
-        role } = req.body
-    if(userId && username && password && firstName && lastName && email && role) {
-        users.push({ userId,
-            username,
-            password,
-            firstName,
-            lastName,
-            email,
-            role })
-        res.sendStatus(201) //Is Created
-    }
-    else {
-        throw new UserInputError()
-    }
-})
-
-//Find Users By Id (endpoint)
-/*** add only allowed roles to be finance-manager, 
-    or if the id provided matches the id of the current user ***/
-app.get('/users/:id', (req:Request, res:Response) => {
-    let {id} = req.params
-    if(isNaN(+id)) {
-        res.status(400).send('Id Needs to be a Number')
-    }
-    else {
-        let found = false
-        for(const user of users) {
-            if(user.userId === +id) {
-                res.json(user)
-                found = true
-            }
-        }
-        if(!found) {
-            res.status(404).send('User Not Found')
-        }
-    }
-})
-
-//Update User (endpoint) ***
-/*** add only allowed roles to be admin ***/
-
-
-//Find Reimbursement By Status ***
-/*** add only allowed roles to be finance-manager ***/
-app.get('/reimbursements/status/:statusId', (req:Request, res:Response) => {
-    let {statusId} = req.params
-    if(isNaN(+statusId)) {
-        res.status(400).send('Status Id Needs to be a Number')
-    }
-    else {
-        let found = false
-        for(const reimbursementStatus of reimbursementStatuses) {
-            if(reimbursementStatus.statusId === +statusId) {
-                res.json(reimbursementStatus) //*** this is supposed to just be reimbursement
-                found = true
-            }
-        }
-        if(!found) {
-            res.status(404).send('Status Id Not Found')
-        }
-    }
-})
-
-//Find Reimbursement By User (endpoint) ***
-/*** add only allowed roles to be finance-manager, 
-    or if the id provided matches the id of the current user ***/
-app.get('/reimbursements/author/userId/:userId', (req:Request, res:Response) => {
-    /*let {userId} = req.params
-    if(isNaN(+userId)) {
-        res.status(400).send('User Id Needs to be a Number')
-    }
-    else {
-        let found = false
-        for(const reimbursement of reimbursements) {
-            if(reimbursement.author === +id) {
-                res.json(user)
-                found = true
-            }
-        }
-        if(!found) {
-            res.status(404).send('User Not Found')
-        }
-    } */
-})
-
-//Submit Reimbursement
-app.post('/reimbursements', (req:Request, res:Response) => {
-    console.log(req.body);
-    let { reimbursementId,
-        author,
-        amount,
-        dateSubmitted,
-        dateResolved,
-        description,
-        resolver,
-        status,
-        type } = req.body
-    if(reimbursementId && author && amount && dateSubmitted && dateResolved && description && resolver && status && type) {
-        reimbursements.push({ reimbursementId,
-            author,
-            amount,
-            dateSubmitted,
-            dateResolved,
-            description,
-            resolver,
-            status,
-            type })
-        res.sendStatus(201) //Created
-    }
-    else {
-        throw new UserInputError()
-    }
-})
-
-
-//Update Reimbursement ***
-/*** add only allowed roles to be finance-manager ***/
 
 //Error handler
 app.use((err, req, res, next) => {
@@ -188,6 +60,7 @@ app.listen(2002, () => {
     console.log('Server is active');
 })
 
+
 let users: User[] = [
     {
         userId: 1,
@@ -198,7 +71,7 @@ let users: User[] = [
         email: "winstonschmidt@mail.com",
         role: {
             roleId: 1,
-            role: "Finance Manager"
+            role: "Admin"
         }
     },
     {
@@ -210,62 +83,27 @@ let users: User[] = [
         email: "winnie@mail.com",
         role: {
             roleId: 2,
-            role: "Employee"
+            role: "Finance Manager"
         }
     }
 ]
 
-let reimbursements: Reimbursement[] = [
+/*
+let roles: Role[] = [
     {
-        reimbursementId: 1,
-        author: 2,
-        amount: 100,
-        dateSubmitted: 3,
-        dateResolved: 4,
-        description: "idk what im doing",
-        resolver: 5,
-        status: 6,
-        type: 7
+        roleId: 1,
+        role: 'Admin'
     },
     {
-        reimbursementId: 2,
-        author: 3,
-        amount: 200,
-        dateSubmitted: 4,
-        dateResolved: 5,
-        description: "idk what im doing pt. 2",
-        resolver: 6,
-        status: 7,
-        type: 8
+        roleId: 2,
+        role: 'Finance Manager'
+    },
+    {
+        roleId: 3,
+        role: 'User'
     }
-]
-/* 
-{
-    "reimbursementId": 1,
-    "author": 2,
-    "amount": 100,
-    "dateSubmitted": 3,
-    "dateResolved": 4,
-    "description": "idk what im doing",
-    "resolver": 5,
-    "status": 6,
-    "type": 7
-}
-*/
-let reimbursementStatuses: ReimbursementStatus[] = [
-    {
-        statusId: 1,
-        status: 'Approved'
-    },
-    {
-        statusId: 2,
-        status: 'Pending'
-    },
-    {
-        statusId: 3,
-        status: 'Denied'
-    }
-]
+] */
+
 /* json
 {
     "userId": 3,
