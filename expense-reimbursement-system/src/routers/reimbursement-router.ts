@@ -53,7 +53,60 @@ reimbursementRouter.post('/', (req:Request, res:Response) => {
 
 //Update Reimbursement ***
 // authorizationMiddleware(['admin', 'finance-manager']),
+reimbursementRouter.patch('/', (req:Request, res:Response) => {
+    let { reimbursementId } = req.body
+    if(!reimbursementId) { //update request must contain a reimbursementId
+        res.status(400).send('Reimbursement Updates Require ReimbursementId and at Least One Other Field')
+    }
+    else if(isNaN(+reimbursementId)) { //check if reimbursementId is valid
+        res.status(400).send('Id Needs to be a Number')
+    }
+    else {
+        let found = false
+        for(const reimbursement of reimbursements) {
+            if(reimbursement.reimbursementId === +reimbursementId) { //check if reimbursement object exists
+                let author = req.body.author //create new author value if it is included in request body
+                if(author) { //if author object was created, update reimbursement.author
+                    reimbursement.author = author
+                }
+                let amount = req.body.amount //create new amount value if it is included in request body
+                if(amount) { //if amount object was created, update reimbursement.amount
+                    reimbursement.amount = amount
+                }
+                let dateSubmitted = req.body.dateSubmitted //create new dateSubmitted value if it is included in request body
+                if(dateSubmitted) { //if dateSubmitted object was created, update reimbursement.dateSubmitted
+                    reimbursement.dateSubmitted = dateSubmitted
+                }
+                let dateResolved = req.body.dateResolved //create new dateResolved value if it is included in request body
+                if(dateResolved) { //if dateResolved object was created, update reimbursement.dateResolved
+                    reimbursement.dateResolved = dateResolved
+                }
+                let description = req.body.description //create new description value if it is included in request body
+                if(description) { //if description object was created, update reimbursement.description
+                    reimbursement.description = description
+                }
+                let resolver = req.body.resolver //create new resolver value if it is included in request body
+                if(resolver) { //if resolver object was created, update reimbursement.resolver
+                    reimbursement.resolver = resolver
+                }
+                let status = req.body.status //create new status value if it is included in request body
+                if(status) { //if status object was created, update reimbursement.status
+                    reimbursement.status = status
+                }
+                let type = req.body.type //create new type value if it is included in request body
+                if(type) { //if type object was created, update reimbursement.type
+                    reimbursement.type = type
+                }
 
+                res.json(reimbursement) //return reimbursement object
+                found = true
+            }
+        }
+        if(!found) {
+            res.status(404).send('Reimbursement Not Found')
+        }
+    }
+})
 
 export let reimbursements: Reimbursement[] = [
     {
