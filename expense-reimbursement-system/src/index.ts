@@ -10,6 +10,8 @@ import { sessionMiddleware } from './middleware/session-middleware'
 import { userRouter } from './routers/user-router'
 import { reimbursementRouter } from './routers/reimbursement-router'
 
+/* PARKS AND REC themed reimbursement system!!! */
+
 //This stays at the top of the file
 const app = express() //creates complete express application
 app.use(express.json()) //Matches every HTTP verb, middleware
