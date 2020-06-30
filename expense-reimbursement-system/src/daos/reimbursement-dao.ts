@@ -11,22 +11,23 @@ export async function getReimbursementByStatus(status:number):Promise<Reimbursem
     try {
         client = await connectionPool.connect()
         let results = await client.query(`select r."reimbursement_id", 
-        r."author", 
-        r."amount", 
-        r."date_submitted",
-        r."date_resolved",
-        r."description",
-        r."resolver",
-        rs."status_id", 
-        rs."status",
-        rt."type_id",
-        rt."type"
-     from ers.reimbursements r 
-   left join ers.reimbursement_statuses rs
-     on r."status" = rs."status_id" 
-   left join ers.reimbursement_types rt
-     on r."type" = rt."type_id"
-       where r."status" = $1;`, [status])
+                                                r."author", 
+                                                r."amount", 
+                                                r."date_submitted",
+                                                r."date_resolved",
+                                                r."description",
+                                                r."resolver",
+                                                rs."status_id", 
+                                                rs."status",
+                                                rt."type_id",
+                                                rt."type"
+                                                    from ers.reimbursements r 
+                                            left join ers.reimbursement_statuses rs
+                                                on r."status" = rs."status_id" 
+                                            left join ers.reimbursement_types rt
+                                                on r."type" = rt."type_id"
+                                                    where r."status" = $1;
+                                            order by r.date_submitted;`, [status])
         if(results.rowCount === 0) {
             throw new Error('Reimbursement Not Found')
         }

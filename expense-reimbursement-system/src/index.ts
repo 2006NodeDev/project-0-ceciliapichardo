@@ -1,14 +1,16 @@
 import express, { Request, Response, NextFunction } from 'express'
-import { BadCredentialsError } from './errors/BadCredentialsError'
 import { sessionMiddleware } from './middleware/session-middleware'
 import { userRouter } from './routers/user-router'
 import { reimbursementRouter } from './routers/reimbursement-router'
 import { loginWithUsernameAndPassword } from './daos/user-dao'
+import { AuthenticationFailureError } from './errors/AuthenticationFailureError'
+import { loggingMiddleware } from './middleware/logging-middleware'
 
 /* PARKS AND REC themed reimbursement system!!! */
 
 const app = express() //creates complete express application
 app.use(express.json()) //Matches every HTTP verb, middleware
+app.use(loggingMiddleware)
 app.use(sessionMiddleware)
 app.use('/users', userRouter) //Redirect all requests on /users to user-router
 app.use('/reimbursements', reimbursementRouter) //Redirect all requests on /reimbursements to reimbursement-router
@@ -21,11 +23,11 @@ app.post('/login', async (req:Request, res:Response, next:NextFunction) => {
     let password = req.body.password
 
     if(!username || !password) {
-        throw new BadCredentialsError();
+        throw new AuthenticationFailureError();
     }
     else { 
         try {
-            let user = await loginWithUsernameAndPassword(username,password)
+            let user = await loginWithUsernameAndPassword(username, password)
             req.session.user = user
             res.json(user)
         } catch (e) {

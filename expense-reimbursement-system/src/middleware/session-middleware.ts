@@ -1,7 +1,7 @@
 import session, { SessionOptions } from 'express-session'
 
 const sessionConfig:SessionOptions = {
-    secret: 'secret', //do not do this in production
+    secret: 'secret',
     cookie:{
         secure: false
     },

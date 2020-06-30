@@ -4,6 +4,7 @@ import { reimbursementStatusRouter } from './reimbursement-status-router'
 import { reimbursementAuthorRouter } from './reimbursement-author-router'
 import { Reimbursement } from '../models/reimbursement'
 import { submitReimbursement, updateReimbursementInfo } from '../daos/reimbursement-dao'
+import { authorizationMiddleware } from '../middleware/authorization-middleware'
 
 export const reimbursementRouter = express.Router()
 
@@ -15,7 +16,7 @@ reimbursementRouter.use('/author/userId', reimbursementAuthorRouter)
 
 //Submit Reimbursement
 // authorizationMiddleware(['admin', 'finance-manager', 'user']),
-reimbursementRouter.post('/', async (req:Request, res:Response, next:NextFunction) => {
+reimbursementRouter.post('/', authorizationMiddleware(['Admin', 'Finance Manager', 'User']), async (req:Request, res:Response, next:NextFunction) => {
     console.log(req.body);
     let { reimbursementId,
         author,
@@ -51,7 +52,7 @@ reimbursementRouter.post('/', async (req:Request, res:Response, next:NextFunctio
 
 //Update Reimbursement, we assume admin and finance-manager have userId for each user
 // authorizationMiddleware(['admin', 'finance-manager']),
-reimbursementRouter.patch('/', async (req:Request, res:Response, next:NextFunction) => {
+reimbursementRouter.patch('/', authorizationMiddleware(['Admin', 'Finance Manager']), async (req:Request, res:Response, next:NextFunction) => {
     let { reimbursementId,
         author,
         amount,
