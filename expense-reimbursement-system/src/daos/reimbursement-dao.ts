@@ -5,6 +5,36 @@ import { ReimbursementDTOtoReimbursementConverter } from "../utils/Reimbursement
 import { ReimbursementNotFoundError } from "../errors/ReimbursementNotFoundError";
 import { ReimbursementInputError } from "../errors/ReimbursementInputError";
 
+//Get All Reimbursements
+export async function getAllReimbursements():Promise<Reimbursement[]> {
+    let client:PoolClient
+    try {
+        client = await connectionPool.connect()
+        let results = await client.query(`select r."reimbursement_id", 
+                                                r."author", 
+                                                r."amount", 
+                                                r."date_submitted", 
+                                                r."date_resolved", 
+                                                r."description", 
+                                                r."resolver", 
+                                                rs."status",
+                                                rs."status_id",
+                                                rt."type",
+                                                rt."type_id" from ers.reimbursements r
+                                            left join ers.reimbursement_statuses rs
+                                                on r."status" = rs."status_id"
+                                            left join ers.reimbursement_types rt
+                                                on r."type" = rt."type_id"
+                                            order by r.date_submitted;`)
+        return results.rows.map(ReimbursementDTOtoReimbursementConverter)
+    } catch (e) {
+        console.log(e);
+        throw new Error('Unhandled Error Occured')
+    } finally {
+        client && client.release()
+    }
+}
+
 //Find Reimbursements By Status
 export async function getReimbursementByStatus(status:number):Promise<Reimbursement[]> {
     let client:PoolClient

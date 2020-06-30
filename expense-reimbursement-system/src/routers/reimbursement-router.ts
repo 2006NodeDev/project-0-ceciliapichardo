@@ -3,7 +3,7 @@ import { UserInputError } from '../errors/UserInputError'
 import { reimbursementStatusRouter } from './reimbursement-status-router'
 import { reimbursementAuthorRouter } from './reimbursement-author-router'
 import { Reimbursement } from '../models/reimbursement'
-import { submitReimbursement, updateReimbursementInfo } from '../daos/reimbursement-dao'
+import { submitReimbursement, updateReimbursementInfo, getAllReimbursements } from '../daos/reimbursement-dao'
 import { authenticationMiddleware } from '../middleware/authentication-middleware'
 import { authorizationMiddleware } from '../middleware/authorization-middleware'
 
@@ -15,6 +15,15 @@ reimbursementRouter.use('/status', reimbursementStatusRouter)
 //Redirect all requests on /reimbursement/author/userId to reimbursement-author-router
 reimbursementRouter.use('/author/userId', reimbursementAuthorRouter)
 
+//Get All Reimbursements
+reimbursementRouter.get('/', authorizationMiddleware(['Admin', 'Finance Manager']), async (req:Request, res:Response, next:NextFunction) => { 
+    try {
+        let allReims = await getAllReimbursements()
+        res.json(allReims)
+    } catch (e) {
+        next(e)
+    }
+})
 
 //Submit Reimbursement
 reimbursementRouter.post('/', authorizationMiddleware(['Admin', 'Finance Manager', 'User']), async (req:Request, res:Response, next:NextFunction) => {

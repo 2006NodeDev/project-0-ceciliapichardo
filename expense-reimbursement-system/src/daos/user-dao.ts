@@ -20,7 +20,8 @@ export async function getAllUsers():Promise<User[]> {
                                             r."role_id", 
                                             r."role" from ers.users u
                                             left join ers.roles r 
-                                            on u."role" = r."role_id";`)
+                                            on u."role" = r."role_id"
+                                            order by u.user_id;`)
         return results.rows.map(UserDTOtoUserConverter)
     } catch (e) {
         console.log(e);
