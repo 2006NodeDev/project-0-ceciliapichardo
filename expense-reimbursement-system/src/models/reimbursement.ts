@@ -4,8 +4,8 @@ export class Reimbursement {
     reimbursementId: number //primary key
     author: number //foreign key -> user not null
     amount: number //not null
-    dateSubmitted: number //not null
-    dateResolved: number //not null
+    dateSubmitted: number//Date //not null
+    dateResolved: number //Date //not null **** see if you can make this null for Pending 
     description: string //not null
     resolver: number // foreign key -> User
     status: number //foreign key -> ReimbursementStatus, not null

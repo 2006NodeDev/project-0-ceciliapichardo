@@ -1,68 +1,23 @@
-import express, { Request, Response } from 'express'
-import { Reimbursement } from '../models/reimbursement'
+import express, { Request, Response, NextFunction } from 'express'
+import { getReimbursementByUserId } from '../daos/reimbursement-dao'
 
 export const reimbursementAuthorRouter = express.Router()
 
-//Find Reimbursement By User (endpoint) *** this isnt working 
+//Find Reimbursement By UserId
 /*** add only allowed roles to be finance-manager, 
     or if the id provided matches the id of the current user
         authorizationMiddleware(['admin', 'finance-manager', 'current']), ***/
-reimbursementAuthorRouter.get('/:userId', (req:Request, res:Response) => {
-    let {userId} = req.params
+reimbursementAuthorRouter.get('/:userId', async (req:Request, res:Response, next:NextFunction) => {
+    let { userId } = req.params
     if(isNaN(+userId)) {
         res.status(400).send('UserId Needs to be a Number')
     }
-    else {
-        let found = false 
-        //Might need an array of Reimbursements[] here ***
-        for(const reimbursement of reimbursements) {
-            console.log(`UserId: ${userId}`);
-            console.log(`Reimbursement Author: ${reimbursement.author}`);
-            if(reimbursement.author === +userId) {
-                res.json(reimbursement)
-                found = true
-            }
-        }
-        if(!found) {
-            res.status(404).send('Reimbursement Not Found')
+    else { 
+        try {
+            let reimByUserId = await getReimbursementByUserId(+userId)
+            res.json(reimByUserId)
+        } catch (e) {
+            next(e)
         }
     }
 })
-
-export let reimbursements: Reimbursement[] = [
-    {
-        reimbursementId: 1,
-        author: 2,
-        amount: 100,
-        dateSubmitted: 2020,
-        dateResolved: 2020,
-        description: "idk what im doing",
-        resolver: 5,
-        status: 2,
-        type: 7
-    },
-    {
-        reimbursementId: 2,
-        author: 3,
-        amount: 200,
-        dateSubmitted: 2019,
-        dateResolved: 2019,
-        description: "idk what im doing pt. 2",
-        resolver: 6,
-        status: 1,
-        type: 8
-    }
-]
-    /* 
-    {
-        "reimbursementId": 1,
-        "author": 2,
-        "amount": 100,
-        "dateSubmitted": 2020,
-        "dateResolved": 2020,
-        "description": "idk what im doing",
-        "resolver": 5,
-        "status": 3,
-        "type": 7
-    }
-    */
