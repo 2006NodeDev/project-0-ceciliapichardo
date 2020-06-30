@@ -8,6 +8,8 @@ export class ReimbursementDTO {
 	date_resolved: Date
 	description: string
 	resolver: number
-	status: number
-	type: number
+	status: string
+	status_id: number
+	type: string
+	type_id: number
 }

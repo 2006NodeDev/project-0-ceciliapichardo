@@ -7,11 +7,17 @@ export function ReimbursementDTOtoReimbursementConverter(rdto: ReimbursementDTO)
         reimbursementId: rdto.reimbursement_id,
         author: rdto.author,
         amount: rdto.amount,
-        dateSubmitted: rdto.date_submitted.getFullYear(),
-        dateResolved: rdto.date_resolved.getFullYear(),
+        dateSubmitted: new Date(rdto.date_submitted), //rdto.date_submitted.getFullYear(),
+        dateResolved: new Date(rdto.date_resolved),//rdto.date_resolved.getFullYear(),
         description: rdto.description,
         resolver: rdto.resolver,
-        status: rdto.status,
-        type: rdto.type,
+        status: {
+            status: rdto.status,
+            statusId: rdto.status_id
+        },
+        type: {
+            type: rdto.type,
+            typeId: rdto.type_id
+        }
     }
 }

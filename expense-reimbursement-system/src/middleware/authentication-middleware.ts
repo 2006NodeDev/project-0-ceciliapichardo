@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 
-
+//Validates Users
 export function authenticationMiddleware(req:Request, res:Response, next:NextFunction) {
     if(!req.session.user) {
         res.status(401).send('Please Login')
     }
     else {
-        console.log(`User ${req.session.user.username} has a role of ${req.session.user.role}`);
+        console.log(`User ${req.session.user.username} has a role of ${req.session.user.role.role}`);
         next()
     }
 }
