@@ -4,7 +4,7 @@ import { reimbursementStatusRouter } from './reimbursement-status-router'
 import { reimbursementAuthorRouter } from './reimbursement-author-router'
 import { Reimbursement } from '../models/reimbursement'
 import { submitReimbursement, updateReimbursementInfo } from '../daos/reimbursement-dao'
-import { authorizationMiddleware } from '../middleware/authorization-middleware'
+//import { authorizationMiddleware } from '../middleware/authorization-middleware'
 
 export const reimbursementRouter = express.Router()
 
@@ -15,16 +15,17 @@ reimbursementRouter.use('/author/userId', reimbursementAuthorRouter)
 
 
 //Submit Reimbursement
-// authorizationMiddleware(['admin', 'finance-manager', 'user']),
-reimbursementRouter.post('/', authorizationMiddleware(['Admin', 'Finance Manager', 'User']), async (req:Request, res:Response, next:NextFunction) => {
+// authorizationMiddleware(['Admin', 'Finance Manager', 'User']),
+reimbursementRouter.post('/', async (req:Request, res:Response, next:NextFunction) => {
     console.log(req.body);
-    let { reimbursementId,
+    let { //reimbursementId,
         author,
         amount,
         dateSubmitted,
         description,
+        status,
         type } = req.body
-    if(reimbursementId && author && amount && dateSubmitted && description && type) {
+    if(/*reimbursementId &&*/ author && amount && dateSubmitted && description && status && type) {
         let newReim: Reimbursement = {
             reimbursementId: 0,
             author,
@@ -33,7 +34,7 @@ reimbursementRouter.post('/', authorizationMiddleware(['Admin', 'Finance Manager
             dateResolved: null,
             description,
             resolver: null,
-            status: 1,
+            status,
             type
         }
         newReim.type = type || null
@@ -51,8 +52,8 @@ reimbursementRouter.post('/', authorizationMiddleware(['Admin', 'Finance Manager
 
 
 //Update Reimbursement, we assume admin and finance-manager have userId for each user
-// authorizationMiddleware(['admin', 'finance-manager']),
-reimbursementRouter.patch('/', authorizationMiddleware(['Admin', 'Finance Manager']), async (req:Request, res:Response, next:NextFunction) => {
+// authorizationMiddleware(['Admin', 'Finance Manager']),
+reimbursementRouter.patch('/', async (req:Request, res:Response, next:NextFunction) => {
     let { reimbursementId,
         author,
         amount,
@@ -68,7 +69,7 @@ reimbursementRouter.patch('/', authorizationMiddleware(['Admin', 'Finance Manage
     else if(isNaN(+reimbursementId)) { //check if reimbursementId is valid
         res.status(400).send('Id Needs to be a Number')
     }
-    else { //***replace with dao function
+    else { 
         let updatedReimInfo:Reimbursement = { 
             reimbursementId, 
             author,

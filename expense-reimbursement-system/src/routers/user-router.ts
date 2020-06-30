@@ -2,15 +2,15 @@ import express, { Request, Response, NextFunction } from 'express'
 import { UserInputError } from '../errors/UserInputError'
 import { getAllUsers, saveAUser, getUserById, updateUserInfo } from '../daos/user-dao'
 import { User } from '../models/user'
-import { authorizationMiddleware } from '../middleware/authorization-middleware'
+//import { authorizationMiddleware } from '../middleware/authorization-middleware'
 
 export const userRouter = express.Router()
-userRouter.use(authorizationMiddleware) //***include this when ready for AUthorization
+//userRouter.use(authorizationMiddleware) //***include this when ready for AUthorization
 
 //Find All Users
 /*** add only allowed roles to be finance-manager ***/
-// authorizationMiddleware(['admin']),
-userRouter.get('/', authorizationMiddleware(['Admin', 'Finance Manager']), async (req:Request, res:Response, next:NextFunction) => { 
+// authorizationMiddleware(['Admin', 'Finance Manager']),
+userRouter.get('/', async (req:Request, res:Response, next:NextFunction) => { 
     try {
         let allUsers = await getAllUsers()
         res.json(allUsers)
@@ -54,8 +54,8 @@ userRouter.post('/', async (req:Request, res:Response, next:NextFunction) => {
 //Find Users By Id
 /*** add only allowed roles to be finance-manager, 
     or if the id provided matches the id of the current user ***/
-    // authorizationMiddleware(['admin', 'finance-manager']),
-userRouter.get('/:id', authorizationMiddleware(['Admin', 'Finance Manager']), async (req:Request, res:Response, next:NextFunction) => {
+// authorizationMiddleware(['Admin', 'Finance Manager', 'Current']), 
+userRouter.get('/:id', async (req:Request, res:Response, next:NextFunction) => {
     let {id} = req.params
     if(isNaN(+id)) {
         res.status(400).send('Id Needs to be a Number')
@@ -72,8 +72,8 @@ userRouter.get('/:id', authorizationMiddleware(['Admin', 'Finance Manager']), as
 
 //Update User, we assume that Admin will have access to UserId for each user
 /*** add only allowed roles to be admin ***/
-// authorizationMiddleware(['admin']),
-userRouter.patch('/', authorizationMiddleware(['Admin']), async (req:Request, res:Response, next:NextFunction) => {
+//  authorizationMiddleware(['Admin']), 
+userRouter.patch('/', async (req:Request, res:Response, next:NextFunction) => {
     let { userId,
         username,
         password,

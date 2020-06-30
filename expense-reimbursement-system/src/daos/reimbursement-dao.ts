@@ -26,7 +26,7 @@ export async function getReimbursementByStatus(status:number):Promise<Reimbursem
                                                 on r."status" = rs."status_id" 
                                             left join ers.reimbursement_types rt
                                                 on r."type" = rt."type_id"
-                                                    where r."status" = $1;
+                                                    where r."status" = $1
                                             order by r.date_submitted;`, [status])
         if(results.rowCount === 0) {
             throw new Error('Reimbursement Not Found')
@@ -93,22 +93,28 @@ export async function submitReimbursement(newReim:Reimbursement):Promise<Reimbur
         if(typeId.rowCount === 0) {
             throw new Error('Type Not Found')
         }
-        typeId = typeId.rows[0].type_id
+        typeId = typeId.rows[0].type_id 
+        let statusId = await client.query(`select rs."status_id" from ers.reimbursement_statuses rs 
+                                            where rs."status" = $1;`, [newReim.status])
+        if(statusId.rowCount === 0) {
+            throw new Error('Status Not Found')
+        }
+        statusId = statusId.rows[0].status_id
         let results = await client.query(`insert into ers.reimbursements ("author", "amount", 
-                                        "date_submitted", "description", "type")
-                                            values($1,$2,$3,$4,$5) 
+                                        "date_submitted", "description", "status", "type")
+                                            values($1,$2,$3,$4,$5,$6) 
                                         returning "reimbursement_id";`,
                                         [newReim.author, newReim.amount, newReim.dateSubmitted,
-                                            newReim.description, newReim.type, typeId])
+                                            newReim.description, statusId, typeId]) 
         newReim.reimbursementId = results.rows[0].reimbursement_id
         
         await client.query('COMMIT;')
         return newReim
     } catch (e) {
         client && client.query('ROLLBACK;')
-        if(e.message === 'Type Not Found') {
+        if(e.message === 'Type Not Found' || e.message === 'Status Not Found') {
             throw new ReimbursementInputError()
-        }
+        } 
         console.log(e);
         throw new Error('Unhandled Error Occured')
     } finally {
