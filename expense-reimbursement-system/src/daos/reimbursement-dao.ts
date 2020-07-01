@@ -124,18 +124,13 @@ export async function submitReimbursement(newReim:Reimbursement):Promise<Reimbur
             throw new Error('Type Not Found')
         }
         typeId = typeId.rows[0].type_id 
-        let statusId = await client.query(`select rs."status_id" from ers.reimbursement_statuses rs 
-                                            where rs."status" = $1;`, [newReim.status])
-        if(statusId.rowCount === 0) {
-            throw new Error('Status Not Found')
-        }
-        statusId = statusId.rows[0].status_id
+        
         let results = await client.query(`insert into ers.reimbursements ("author", "amount", 
                                         "date_submitted", "description", "status", "type")
                                             values($1,$2,$3,$4,$5,$6) 
                                         returning "reimbursement_id";`,
                                         [newReim.author, newReim.amount, newReim.dateSubmitted,
-                                            newReim.description, statusId, typeId]) 
+                                            newReim.description, newReim.status.statusId, typeId]) 
         newReim.reimbursementId = results.rows[0].reimbursement_id
         
         await client.query('COMMIT;')

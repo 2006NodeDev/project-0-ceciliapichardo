@@ -33,9 +33,8 @@ reimbursementRouter.post('/', authorizationMiddleware(['Admin', 'Finance Manager
         amount,
         dateSubmitted,
         description,
-        status,
         type } = req.body
-    if(author && amount && dateSubmitted && description && status && type) {
+    if(author && amount && dateSubmitted && description && type) {
         let newReim: Reimbursement = {
             reimbursementId: 0,
             author,
@@ -44,7 +43,11 @@ reimbursementRouter.post('/', authorizationMiddleware(['Admin', 'Finance Manager
             dateResolved: null,
             description,
             resolver: null,
-            status,
+            status: //status is automatically 1:"Pending"
+                {
+                    status: 'Pending',
+                    statusId: 1
+                },
             type
         }
         newReim.type = type || null

@@ -6,12 +6,12 @@ import { loginWithUsernameAndPassword } from './daos/user-dao'
 import { AuthenticationFailureError } from './errors/AuthenticationFailureError'
 import { loggingMiddleware } from './middleware/logging-middleware'
 
-/* PARKS AND REC themed reimbursement system!!! */
+/* Reimbursement System for the Pawnee, Indiana Parks Department */
 
-const app = express() //creates complete express application
+const app = express() //Creates complete express application
 app.use(express.json()) //Matches every HTTP verb, middleware
-app.use(loggingMiddleware)
-app.use(sessionMiddleware)
+app.use(loggingMiddleware) //Logs out request method, ip address making request, and path of request
+app.use(sessionMiddleware) //Attaches a session object to the request where each unique connection to the server has a unique session
 app.use('/users', userRouter) //Redirect all requests on /users to user-router
 app.use('/reimbursements', reimbursementRouter) //Redirect all requests on /reimbursements to reimbursement-router
 
