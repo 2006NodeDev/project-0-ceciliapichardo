@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { AuthorizationFailureError } from "../errors/AuthorizationFailureError"
 
-//Specifies which roles are allowed to do what 
+//Specifies which roles are allowed to make certain requests
 export function authorizationMiddleware(roles:string[]) {
     return  (req:Request, res:Response, next:NextFunction) => {
         let isAllowed = false
@@ -9,7 +9,6 @@ export function authorizationMiddleware(roles:string[]) {
             if(role === req.session.user.role.role) { //has to be .role.role
                 isAllowed = true
                 next()
-                //break;
             } 
             else if(role === 'Current') { //current Users can get their own reimByUserId and userById
                 let id = req.url.substring(1) //.url gets URI, substring gets /id after URI
@@ -18,7 +17,6 @@ export function authorizationMiddleware(roles:string[]) {
                 if(req.session.user.userId == id) { //If they match, they are authorized to see whatever they requested
                     isAllowed = true
                     next()
-                    //break;
                 }
             }
         }

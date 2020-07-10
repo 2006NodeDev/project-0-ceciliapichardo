@@ -15,6 +15,9 @@ app.use(sessionMiddleware) //Attaches a session object to the request where each
 app.use('/users', userRouter) //Redirect all requests on /users to user-router
 app.use('/reimbursements', reimbursementRouter) //Redirect all requests on /reimbursements to reimbursement-router
 
+app.get('/health', (req:Request, res:Response) => {
+    res.sendStatus(200)
+})
 
 
 //Login 
